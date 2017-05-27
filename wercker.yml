@@ -12,21 +12,8 @@ build:
         flags: --buildDrafts=true
 deploy-site:
   steps:
-    - install-packages:
-        packages: rsync ssh
-    - create-file:
-        name: write key
-        filename: ./scalable.key
-        content: $SCALABLE_KEY_PRIVATE
-        overwrite: true
-        hide-from-log: true
-    - script:
-        name: chmod private key
-        code: chmod 600 ./scalable.key
-    - add-to-known_hosts:
-        hostname: scalable.af
-    - anka-sirota/rsync-deploy@0.1.12:
-        host: scalable.af
-        source: ./public/
-        directory: /var/www/html
-        sshkey: ./scalable.key
+      - s3sync:
+            key_id: $AWS_ACCESS_KEY_ID
+            key_secret: $AWS_SECRET_ACCESS_KEY
+            bucket_url: $AWS_BUCKET_URL
+            source_dir: ./public/
