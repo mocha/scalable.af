@@ -1,0 +1,32 @@
+box: debian
+build:
+  steps:
+    - install-packages:
+        packages: git
+    - script:
+        name: download theme
+        code: |
+            $(git clone https://github.com/jpescador/hugo-future-imperfect.git ./themes/hugo-future-imperfect)
+    - arjen/hugo-build@1.16.3:
+        theme: hugo-future-imperfect
+        flags: --buildDrafts=true
+deploy-site:
+  steps:
+    - install-packages:
+        packages: rsync ssh
+    - create-file:
+        name: write key
+        filename: ./scalable.key
+        content: $SCALABLE_KEY_PRIVATE
+        overwrite: true
+        hide-from-log: true
+    - script:
+        name: chmod private key
+        code: chmod 600 ./scalable.key
+    - add-to-known_hosts:
+        hostname: scalable.af
+    - anka-sirota/rsync-deploy@0.1.12:
+        host: scalable.af
+        source: ./public/
+        directory: /var/www/html
+        sshkey: ./scalable.key
